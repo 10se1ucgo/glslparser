@@ -6,8 +6,7 @@ cabal-version: 1.12
 
 name:                glslparser
 version:             0.1.0.0
-license-file:        LICENSE
-maintainer:          Hammaad
+maintainer:          10se1ucgo
 build-type:          Simple
 
 library
