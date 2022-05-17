@@ -106,21 +106,20 @@ parseExpr = parseAssignExpr -- TODO: Comma expr!
 -- Note: Assignment is right-associative
 -- assignment_expr = condition_expr | unary_expr ASSIGN_OP assign_expr
 parseAssignExpr :: TParser Expr
-parseAssignExpr = (
-        flip AssignExpr
-              <$> parseUnaryExpr
-              <*> parseAssignOp
-              <*> parseAssignExpr) <|> parseConditionExpr
+parseAssignExpr = (flip AssignExpr
+               <$> parseUnaryExpr
+               <*> parseAssignOp
+               <*> parseAssignExpr) <|> parseConditionExpr
 
 -- Note: ?: is right-associative
 -- cond_expr = logical_or_expr QMARK expr COLON assign_expr
 parseConditionExpr :: TParser Expr
 parseConditionExpr = (ConditionExpr
-                 <$> parseLogicalOrExpr
-                 <*char (Op O_QMark)
-                 <*> parseExpr
-                 <*char (Op O_Colon)
-                 <*> parseAssignExpr) <|> parseLogicalOrExpr
+                  <$> parseLogicalOrExpr
+                  <*  char (Op O_QMark)
+                  <*> parseExpr
+                  <*  char (Op O_Colon)
+                  <*> parseAssignExpr) <|> parseLogicalOrExpr
 
 -- This feels like a good case for some good ol fashioned generated code, or maybe template haskell,
 -- but I don't know enough about it to feasibly implement it in time
@@ -164,8 +163,8 @@ parseMultExpr       = chainl1 parseUnaryExpr      $ BinExpr <$> choice [(#*), (#
 
 parseUnaryExpr :: TParser Expr
 parseUnaryExpr = (UnaryExpr
-             <$> choice [(#++^), (#--^), (#+^), (#-^), (#~^), (#!^)]
-             <*> parseUnaryExpr) <|> parsePostfixExpr
+              <$> choice [(#++^), (#--^), (#+^), (#-^), (#~^), (#!^)]
+              <*> parseUnaryExpr) <|> parsePostfixExpr
 
 -- TODO: Actual postfix operators!!! I'm having trouble thinking how to implement it, but it shouldn't be hard.
 parsePostfixExpr :: TParser Expr
@@ -199,8 +198,8 @@ parseFuncCall = FuncCallExpr <$> parseFunctionName <*> betweenParens parseFuncCa
 
 -- An optional expression followed by a semicolon
 parseExprStatement :: TParser Statement
-parseExprStatement = ExprStatement <$> (parseExpr <* char Semicolon) <|> (
-        char Semicolon $> EmptyStatement)
+parseExprStatement = ExprStatement 
+                 <$> (parseExpr <* char Semicolon) <|> (char Semicolon $> EmptyStatement)
 
 -- Parse else <body> or return Nothing 
 parseElseStatement :: TParser (Maybe Statement)
@@ -208,7 +207,10 @@ parseElseStatement = (char (KW KW_else) *> (Just <$> parseStatement)) <|> pure N
 
 -- if (<expr>) <statement> (else <statement>)?
 parseIfStatement :: TParser Statement
-parseIfStatement = char (KW KW_if) *> (IfStatement <$> betweenParens parseExpr <*> parseStatement <*> parseElseStatement)
+parseIfStatement = char (KW KW_if) *> $ IfStatement 
+                                    <$> betweenParens parseExpr 
+                                    <*> parseStatement 
+                                    <*> parseElseStatement
 
 parseStatement :: TParser Statement
 parseStatement = choice [StatementList <$> parseCompoundStatement, DeclStatement <$> parseVarDecl, parseIfStatement, parseExprStatement]
