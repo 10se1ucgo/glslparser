@@ -207,10 +207,10 @@ parseElseStatement = (char (KW KW_else) *> (Just <$> parseStatement)) <|> pure N
 
 -- if (<expr>) <statement> (else <statement>)?
 parseIfStatement :: TParser Statement
-parseIfStatement = char (KW KW_if) *> $ IfStatement 
-                                    <$> betweenParens parseExpr 
-                                    <*> parseStatement 
-                                    <*> parseElseStatement
+parseIfStatement = char (KW KW_if) *> (IfStatement 
+                                   <$> betweenParens parseExpr 
+                                   <*> parseStatement 
+                                   <*> parseElseStatement)
 
 parseStatement :: TParser Statement
 parseStatement = choice [StatementList <$> parseCompoundStatement, DeclStatement <$> parseVarDecl, parseIfStatement, parseExprStatement]
